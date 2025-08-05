@@ -1,23 +1,28 @@
 import { NextResponse } from 'next/server';
 
+type ApiNamedItem = {
+  name: string;
+  id: string;
+};
+
 export async function GET() {
   const affiliateId = process.env.DMM_AFFILIATE_ID?.trim();
   const apiId = process.env.DMM_API_ID?.trim();
 
-  if (!affiliateId || !apiId) {
-    // ... (省略)
+  // IDが存在しない場合は、ここで処理を中断してエラーを返す
+  if (!apiId || !affiliateId) {
+    return NextResponse.json(
+      { message: 'API IDまたはアフィリエイトIDが環境変数に設定されていません。' },
+      { status: 500 }
+    );
   }
 
-  // ▼▼▼【変更点】女優やメーカーの型を定義します ▼▼▼
-  type ApiNamedItem = {
-    name: string;
-    id: string;
-  };
-
+  // この行以降、TypeScriptは apiId と affiliateId が string 型であることを認識します。
+  
   try {
     const params = new URLSearchParams({
-      api_id: apiId,
-      affiliate_id: affiliateId,
+      api_id: apiId, // ここではもう undefined の可能性はない
+      affiliate_id: affiliateId, // ここではもう undefined の可能性はない
       site: 'FANZA',
       service: 'digital',
       floor: 'videoa',
@@ -48,7 +53,7 @@ export async function GET() {
       title: randomItem.title,
       affiliateURL: randomItem.affiliateURL,
       movieURL: randomItem.sampleMovieURL?.size_720_480 || randomItem.sampleMovieURL?.size_476_306 || '',
-      // ▼▼▼【変更点】(a: any) を (a: ApiNamedItem) に修正します ▼▼▼
+      mainImageURL: randomItem.imageURL.list,
       actress: randomItem.iteminfo?.actress?.map((a: ApiNamedItem) => a.name).join(', '),
       maker: randomItem.iteminfo?.maker?.[0]?.name,
     };
@@ -56,6 +61,11 @@ export async function GET() {
     return NextResponse.json(formattedItem);
 
   } catch (error) {
-    // ... (省略)
+    const errorMessage = error instanceof Error ? error.message : '不明なエラーが発生しました';
+    console.error("APIルートでエラーが発生しました:", errorMessage);
+    return NextResponse.json(
+      { message: `サーバー内部でエラーが発生しました: ${errorMessage}` },
+      { status: 500 }
+    );
   }
 }
