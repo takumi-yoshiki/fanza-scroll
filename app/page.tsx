@@ -73,7 +73,7 @@ export default function Home() {
   }, [swiper]);
 
   return (
-    <main className="w-screen h-screen bg-black overflow-hidden">
+    <main className="w-screen bg-black overflow-hidden" style={{ height: '100dvh' }}>
       {items.length === 0 && (
         <div className="w-full h-full flex items-center justify-center text-white">
           <div className="flex flex-col items-center gap-3">

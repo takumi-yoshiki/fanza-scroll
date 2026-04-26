@@ -18,6 +18,7 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
   overflow: hidden; /* Swiperが全画面を管理するため */
+  height: 100dvh;  /* iOSのブラウザUIを除いた実際の表示領域を使う */
 }
 
 /* スクロールバーを非表示 */
