@@ -53,14 +53,28 @@ export default function VideoPlayer({ item, onPrev, onNext }: VideoPlayerProps) 
 
       {/* ── 動画エリア（16:9固定）＋右サイドボタン ── */}
       <div className="relative w-full flex-shrink-0" style={{ aspectRatio: '16/9' }}>
-        <iframe
-          key={item.id}
-          className="absolute inset-0 w-full h-full"
-          src={item.movieURL}
-          allow="autoplay; encrypted-media"
-          allowFullScreen
-          style={{ border: 0 }}
-        />
+        {item.movieURL.toLowerCase().includes('.mp4') ? (
+          /* MP4直リンクの場合: ネイティブvideoタグ（スライダー・10秒送りあり） */
+          <video
+            key={item.id}
+            className="absolute inset-0 w-full h-full bg-black"
+            src={item.movieURL}
+            controls
+            playsInline
+            preload="metadata"
+            style={{ objectFit: 'contain' }}
+          />
+        ) : (
+          /* 埋め込みプレイヤーURLの場合: iframe */
+          <iframe
+            key={item.id}
+            className="absolute inset-0 w-full h-full"
+            src={item.movieURL}
+            allow="autoplay; encrypted-media"
+            allowFullScreen
+            style={{ border: 0 }}
+          />
+        )}
 
         {/* 右サイドボタン */}
         <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col items-center gap-3 z-10">
