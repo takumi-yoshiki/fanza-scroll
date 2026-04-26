@@ -40,7 +40,16 @@ export async function GET() {
       throw new Error('APIから有効な商品が取得できませんでした。');
     }
 
-    const items = data.result.items;
+    // サンプル動画URLを持つものだけに絞り込む
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const items = (data.result.items as any[]).filter(
+      (item) => item.sampleMovieURL?.size_720_480 || item.sampleMovieURL?.size_476_306
+    );
+
+    if (items.length === 0) {
+      throw new Error('サンプル動画を持つ商品が取得できませんでした。');
+    }
+
     const randomIndex = Math.floor(Math.random() * items.length);
     const randomItem = items[randomIndex];
 

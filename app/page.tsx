@@ -33,6 +33,14 @@ export default function Home() {
       const res = await fetch('/api/items');
       if (!res.ok) return;
       const newItem: Item = await res.json();
+
+      // movieURL が空の場合はスキップして再取得
+      if (!newItem.movieURL) {
+        setIsLoading(false);
+        fetchMoreItems();
+        return;
+      }
+
       setItems((prevItems) => {
         if (!prevItems.some(item => item.id === newItem.id)) {
           return [...prevItems, newItem];
