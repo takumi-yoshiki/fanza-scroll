@@ -53,10 +53,15 @@ export async function GET() {
     const randomIndex = Math.floor(Math.random() * items.length);
     const randomItem = items[randomIndex];
 
+    // APIのaffiliatURLはモバイルSafariでファイルダウンロードになるため、
+    // content_idとaffiliate_idから直接商品URLを組み立てる
+    const contentId: string = randomItem.content_id;
+    const productURL = `https://www.dmm.co.jp/digital/videoa/-/detail/=/cid=${contentId}/?affiliate_id=${affiliateId}`;
+
     const formattedItem = {
-      id: randomItem.content_id,
+      id: contentId,
       title: randomItem.title,
-      affiliateURL: randomItem.affiliateURL,
+      affiliateURL: productURL,
       movieURL: randomItem.sampleMovieURL?.size_720_480 || randomItem.sampleMovieURL?.size_476_306 || '',
       mainImageURL: randomItem.imageURL?.list || '',
       actress: randomItem.iteminfo?.actress?.map((a: ApiNamedItem) => a.name).join(', ') || '',
