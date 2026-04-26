@@ -115,7 +115,7 @@ export default function VideoPlayer({ item, onPrev, onNext }: VideoPlayerProps) 
       </div>
 
       {/* ── 情報エリア（動画の下、常時表示）── */}
-      <div className="flex-1 flex flex-col justify-between px-4 pt-3 pb-5 min-h-0">
+      <div className="flex-1 flex flex-col px-4 pt-3 pb-5 min-h-0">
         <div>
           {/* 女優名 */}
           {item.actress && (
@@ -145,7 +145,7 @@ export default function VideoPlayer({ item, onPrev, onNext }: VideoPlayerProps) 
           href={item.affiliateURL}
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-3 flex items-center justify-center gap-2 w-full
+          className="mt-4 flex items-center justify-center gap-2 w-full
                      bg-gradient-to-r from-pink-500 to-rose-600
                      hover:from-pink-400 hover:to-rose-500
                      active:scale-95 transition-all
