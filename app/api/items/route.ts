@@ -9,7 +9,6 @@ export async function GET() {
   const affiliateId = process.env.DMM_AFFILIATE_ID?.trim();
   const apiId = process.env.DMM_API_ID?.trim();
 
-  // IDが存在しない場合は、ここで処理を中断してエラーを返す
   if (!apiId || !affiliateId) {
     return NextResponse.json(
       { message: 'API IDまたはアフィリエイトIDが環境変数に設定されていません。' },
@@ -17,12 +16,10 @@ export async function GET() {
     );
   }
 
-  // この行以降、TypeScriptは apiId と affiliateId が string 型であることを認識します。
-  
   try {
     const params = new URLSearchParams({
-      api_id: apiId, // ここではもう undefined の可能性はない
-      affiliate_id: affiliateId, // ここではもう undefined の可能性はない
+      api_id: apiId,
+      affiliate_id: affiliateId,
       site: 'FANZA',
       service: 'digital',
       floor: 'videoa',
@@ -31,8 +28,7 @@ export async function GET() {
     });
 
     const requestUrl = `https://api.dmm.com/affiliate/v3/ItemList?${params}`;
-
-    const response = await fetch(requestUrl);
+    const response = await fetch(requestUrl, { next: { revalidate: 300 } }); // 5分キャッシュ
 
     if (!response.ok) {
       throw new Error(`APIからの応答が正常ではありません: ${response.status} ${response.statusText}`);
@@ -53,9 +49,14 @@ export async function GET() {
       title: randomItem.title,
       affiliateURL: randomItem.affiliateURL,
       movieURL: randomItem.sampleMovieURL?.size_720_480 || randomItem.sampleMovieURL?.size_476_306 || '',
-      mainImageURL: randomItem.imageURL.list,
-      actress: randomItem.iteminfo?.actress?.map((a: ApiNamedItem) => a.name).join(', '),
-      maker: randomItem.iteminfo?.maker?.[0]?.name,
+      mainImageURL: randomItem.imageURL?.list || '',
+      actress: randomItem.iteminfo?.actress?.map((a: ApiNamedItem) => a.name).join(', ') || '',
+      maker: randomItem.iteminfo?.maker?.[0]?.name || '',
+      // ジャンル：最大3つまでカンマ区切りで返す
+      genre: randomItem.iteminfo?.genre
+        ?.slice(0, 3)
+        .map((g: ApiNamedItem) => g.name)
+        .join(' · ') || '',
     };
 
     return NextResponse.json(formattedItem);

@@ -14,15 +14,16 @@ interface Item {
   title: string;
   affiliateURL: string;
   movieURL: string;
+  mainImageURL?: string;
   actress?: string;
   maker?: string;
+  genre?: string;
 }
 
 export default function Home() {
   const [items, setItems] = useState<Item[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [swiper, setSwiper] = useState<SwiperClass | null>(null);
-  // ▼▼▼【変更点1】現在表示中のスライド番号を管理するstateを追加 ▼▼▼
   const [activeIndex, setActiveIndex] = useState(0);
 
   const fetchMoreItems = async () => {
@@ -31,7 +32,7 @@ export default function Home() {
     try {
       const res = await fetch('/api/items');
       if (!res.ok) return;
-      const newItem = await res.json();
+      const newItem: Item = await res.json();
       setItems((prevItems) => {
         if (!prevItems.some(item => item.id === newItem.id)) {
           return [...prevItems, newItem];
@@ -45,46 +46,53 @@ export default function Home() {
     }
   };
 
+  // 初期ロード：3本先読み
   useEffect(() => {
     fetchMoreItems();
     fetchMoreItems();
     fetchMoreItems();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // キーボード操作
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'ArrowUp') {
-        swiper?.slidePrev();
-      } else if (event.key === 'ArrowDown') {
-        swiper?.slideNext();
-      }
+      if (event.key === 'ArrowUp') swiper?.slidePrev();
+      else if (event.key === 'ArrowDown') swiper?.slideNext();
     };
     document.addEventListener('keydown', handleKeyDown);
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-    };
+    return () => document.removeEventListener('keydown', handleKeyDown);
   }, [swiper]);
 
   return (
-    <main className="min-h-screen bg-black">
+    <main className="w-screen h-screen bg-black overflow-hidden">
+      {items.length === 0 && (
+        <div className="w-full h-full flex items-center justify-center text-white">
+          <div className="flex flex-col items-center gap-3">
+            <div className="w-10 h-10 border-4 border-pink-500 border-t-transparent rounded-full animate-spin" />
+            <p className="text-sm text-gray-400">読み込み中...</p>
+          </div>
+        </div>
+      )}
+
       <Swiper
-        direction={'vertical'}
-        className="w-full h-screen"
+        direction="vertical"
+        className="w-full h-full"
         modules={[Mousewheel]}
         mousewheel={true}
-        onReachEnd={() => {
-          fetchMoreItems();
-        }}
+        onReachEnd={fetchMoreItems}
         onSwiper={setSwiper}
-        // ▼▼▼【変更点2】スライドが切り替わった時に、現在の番号をstateに保存 ▼▼▼
         onSlideChange={(swiperInstance) => {
           setActiveIndex(swiperInstance.activeIndex);
+          // 残り2本以下になったら追加読み込み
+          if (swiperInstance.activeIndex >= items.length - 2) {
+            fetchMoreItems();
+          }
         }}
       >
         {items.map((item, index) => (
           <SwiperSlide key={item.id}>
-            <div className="w-full h-full grid place-items-center">
-              {/* ▼▼▼【変更点3】現在表示中のスライドだけVideoPlayerを描画する ▼▼▼ */}
+            <div className="w-full h-full">
               {index === activeIndex && (
                 <VideoPlayer
                   item={item}
