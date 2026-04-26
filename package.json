@@ -12,7 +12,8 @@
     "next": "^16.2.4",
     "react": "19.1.0",
     "react-dom": "19.1.0",
-    "swiper": "^11.2.10"
+    "swiper": "^11.2.10",
+    "twitter-api-v2": "^1.29.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
